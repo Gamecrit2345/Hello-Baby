@@ -8,26 +8,29 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: radial-gradient(circle at center, #200000, #000000);
+  background: radial-gradient(circle at center, #2a0000, #000000 70%);
 }
 
 #text {
   position: absolute;
   width: 100%;
   text-align: center;
-  top: 20px;
+  top: 25px;
   color: white;
-  font-size: 28px;
-  text-shadow: 0 0 15px red;
-  z-index: 10;
+  font-size: 30px;
   font-family: Arial;
+  text-shadow: 0 0 20px red, 0 0 40px darkred;
+  z-index: 10;
 }
 
 .glow {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(255,0,0,0.15), transparent 60%);
+  background: radial-gradient(circle at center,
+    rgba(255,0,0,0.25),
+    transparent 60%
+  );
   pointer-events: none;
 }
 </style>
@@ -35,7 +38,7 @@ body {
 
 <body>
 
-<div id="text">Sorry Baby 💔 (Drag the Heart)</div>
+<div id="text">Sorry Baby 💔</div>
 <div class="glow"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
@@ -57,94 +60,115 @@ camera.position.z = 6;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
 // =========================
-// LIGHTS
+// LIGHTS (STRONGER CINEMATIC)
 // =========================
-scene.add(new THREE.AmbientLight(0x330000, 1));
+scene.add(new THREE.AmbientLight(0x220000, 1.5));
 
-const light = new THREE.PointLight(0xff0000, 3, 100);
-light.position.set(3, 3, 3);
-scene.add(light);
+const redLight = new THREE.PointLight(0xff0000, 5, 100);
+redLight.position.set(3, 3, 3);
+scene.add(redLight);
+
+const whiteLight = new THREE.PointLight(0xffffff, 1.5, 100);
+whiteLight.position.set(-3, 2, 2);
+scene.add(whiteLight);
 
 // =========================
-// HEART SHAPE
+// ❤️ BETTER HEART SHAPE (SMOOTH + ROUND)
 // =========================
 function createHeartShape() {
+
   const shape = new THREE.Shape();
 
-  shape.moveTo(0, 0.5);
-  shape.bezierCurveTo(0, 1.2, 1.4, 1.2, 1.4, 0.4);
-  shape.bezierCurveTo(1.4, -0.3, 0.8, -0.8, 0, -1.4);
-  shape.bezierCurveTo(-0.8, -0.8, -1.4, -0.3, -1.4, 0.4);
-  shape.bezierCurveTo(-1.4, 1.2, 0, 1.2, 0, 0.5);
+  // TOP CENTER
+  shape.moveTo(0, 0.7);
+
+  // LEFT TOP CURVE
+  shape.bezierCurveTo(
+    -1.6, 1.6,
+    -2.2, 0.6,
+    -1.6, -0.3
+  );
+
+  // LEFT BOTTOM CURVE
+  shape.bezierCurveTo(
+    -1.2, -1.2,
+    -0.4, -1.6,
+    0, -2.0
+  );
+
+  // RIGHT BOTTOM CURVE
+  shape.bezierCurveTo(
+    0.4, -1.6,
+    1.2, -1.2,
+    1.6, -0.3
+  );
+
+  // RIGHT TOP CURVE
+  shape.bezierCurveTo(
+    2.2, 0.6,
+    1.6, 1.6,
+    0, 0.7
+  );
 
   return shape;
 }
 
 // =========================
-// HEART OBJECT
+// HEART GEOMETRY (MORE DETAIL)
 // =========================
 const geometry = new THREE.ExtrudeGeometry(createHeartShape(), {
-  depth: 1.2,
+  depth: 1.8,            // 🔥 deeper = more 3D
   bevelEnabled: true,
-  bevelThickness: 0.4,
-  bevelSize: 0.4,
-  bevelSegments: 10
+  bevelThickness: 0.6,
+  bevelSize: 0.6,
+  bevelSegments: 20
 });
 
-const material = new THREE.MeshStandardMaterial({
+// =========================
+// MATERIAL (ULTRA GLOSSY)
+// =========================
+const material = new THREE.MeshPhysicalMaterial({
   color: 0xff0000,
-  metalness: 0.6,
-  roughness: 0.25,
-  emissive: 0x330000
+  metalness: 0.9,
+  roughness: 0.15,
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.1,
+  emissive: 0x330000,
+  emissiveIntensity: 1.8
 });
 
 const heart = new THREE.Mesh(geometry, material);
 scene.add(heart);
 
 // =========================
-// DRAG SYSTEM (MOUSE + TOUCH)
+// PARTICLES
 // =========================
+const particles = new THREE.Group();
 
-let isDragging = false;
-let targetX = 0;
-let targetY = 0;
+for (let i = 0; i < 160; i++) {
 
-// convert screen to world-ish movement
-function getPointerPos(clientX, clientY) {
-  return {
-    x: (clientX / window.innerWidth) * 2 - 1,
-    y: -(clientY / window.innerHeight) * 2 + 1
-  };
+  const geo = new THREE.SphereGeometry(0.03, 12, 12);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff5555 });
+
+  const p = new THREE.Mesh(geo, mat);
+
+  p.position.set(
+    (Math.random() - 0.5) * 14,
+    (Math.random() - 0.5) * 14,
+    (Math.random() - 0.5) * 14
+  );
+
+  particles.add(p);
 }
 
-// MOUSE
-window.addEventListener("mousedown", () => isDragging = true);
-window.addEventListener("mouseup", () => isDragging = false);
-
-window.addEventListener("mousemove", (e) => {
-  if (!isDragging) return;
-  const pos = getPointerPos(e.clientX, e.clientY);
-  targetX = pos.x * 3;
-  targetY = pos.y * 3;
-});
-
-// TOUCH (PHONE)
-window.addEventListener("touchstart", () => isDragging = true);
-window.addEventListener("touchend", () => isDragging = false);
-
-window.addEventListener("touchmove", (e) => {
-  if (!isDragging) return;
-  const touch = e.touches[0];
-  const pos = getPointerPos(touch.clientX, touch.clientY);
-  targetX = pos.x * 3;
-  targetY = pos.y * 3;
-});
+scene.add(particles);
 
 // =========================
-// ANIMATION
+// ANIMATION (SMOOTH HEARTBEAT)
 // =========================
 
 let t = 0;
@@ -155,16 +179,17 @@ function animate() {
 
   t += 0.02;
 
-  // smooth follow (drag feel)
-  heart.position.x += (targetX - heart.position.x) * 0.1;
-  heart.position.y += (targetY - heart.position.y) * 0.1;
+  // smooth rotation
+  heart.rotation.y += 0.006;
+  heart.rotation.x += 0.003;
 
-  // heartbeat pulse
-  const scale = 1 + Math.sin(t * 3) * 0.08;
-  heart.scale.set(scale, scale, scale);
+  // natural heartbeat (less robotic)
+  const pulse = 1 + Math.sin(t * 2.5) * 0.1;
+  heart.scale.set(pulse, pulse, pulse);
 
-  // slow rotation
-  heart.rotation.y += 0.005;
+  // particle movement
+  particles.rotation.y += 0.0015;
+  particles.rotation.x += 0.001;
 
   renderer.render(scene, camera);
 }
