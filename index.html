@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sorry Baby</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: Arial;
+}
+
+/* HEART */
+.heart {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: red;
+  transform: rotate(45deg);
+  animation: beat 1s infinite;
+  box-shadow: 0 0 40px red;
+}
+
+.heart::before,
+.heart::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: red;
+  border-radius: 50%;
+}
+
+.heart::before {
+  top: -50px;
+  left: 0;
+}
+
+.heart::after {
+  left: -50px;
+  top: 0;
+}
+
+/* TEXT */
+.text {
+  position: absolute;
+  color: white;
+  font-size: 28px;
+  margin-top: 180px;
+  text-align: center;
+  text-shadow: 0 0 10px red;
+  animation: fade 2s ease-in-out infinite alternate;
+}
+
+/* BEAT ANIMATION */
+@keyframes beat {
+  0% { transform: rotate(45deg) scale(1); }
+  50% { transform: rotate(45deg) scale(1.2); }
+  100% { transform: rotate(45deg) scale(1); }
+}
+
+/* TEXT ANIMATION */
+@keyframes fade {
+  0% { opacity: 0.5; transform: translateY(0); }
+  100% { opacity: 1; transform: translateY(-10px); }
+}
+
+/* FLOAT HEART PARTICLES */
+.particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: red;
+  transform: rotate(45deg);
+  animation: float 4s linear infinite;
+  opacity: 0.6;
+}
+
+.particle::before,
+.particle::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: red;
+  border-radius: 50%;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10vh) rotate(45deg);
+    opacity: 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="heart"></div>
+
+<div class="text">Sorry Baby 💔</div>
+
+<script>
+// floating hearts
+for (let i = 0; i < 20; i++) {
+  let p = document.createElement("div");
+  p.className = "particle";
+  p.style.left = Math.random() * window.innerWidth + "px";
+  p.style.animationDuration = (2 + Math.random() * 3) + "s";
+  document.body.appendChild(p);
+}
+</script>
+
+</body>
+</html>
