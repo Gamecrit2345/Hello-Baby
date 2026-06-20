@@ -11,7 +11,6 @@ body {
   background: radial-gradient(circle at center, #3a0000, #000000 75%);
 }
 
-/* TEXT */
 #text {
   position: absolute;
   width: 100%;
@@ -24,7 +23,6 @@ body {
   z-index: 10;
 }
 
-/* STRONGER GLOW BACKGROUND */
 .glow {
   position: absolute;
   width: 100%;
@@ -54,12 +52,9 @@ body {
 
 <script>
 
-// =========================
-// SCENE
-// =========================
+// ================= SCENE =================
 const scene = new THREE.Scene();
 
-// CAMERA
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -68,41 +63,30 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 6;
 
-// RENDERER (BRIGHTER LOOK)
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
   alpha: true
 });
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-// =========================
-// 🔥 IMPROVED LIGHTING (FIXED DARK ISSUE)
-// =========================
-
-// ambient light (BRIGHTER BASE)
+// ================= LIGHTING (BRIGHT FIX) =================
 scene.add(new THREE.AmbientLight(0x550000, 1.8));
 
-// main red light (strong glow)
 const redLight = new THREE.PointLight(0xff0000, 5, 100);
 redLight.position.set(4, 4, 4);
 scene.add(redLight);
 
-// fill light (IMPORTANT FOR VISIBILITY)
 const fillLight = new THREE.PointLight(0xff6666, 2.5, 100);
 fillLight.position.set(-4, 2, 3);
 scene.add(fillLight);
 
-// white highlight (gives shiny 3D look)
 const whiteLight = new THREE.PointLight(0xffffff, 1.8, 100);
 whiteLight.position.set(0, 5, 5);
 scene.add(whiteLight);
 
-// =========================
-// ❤️ HEART SHAPE (IMPROVED SMOOTH)
-// =========================
+// ================= HEART SHAPE =================
 function createHeartShape() {
 
   const shape = new THREE.Shape();
@@ -117,9 +101,7 @@ function createHeartShape() {
   return shape;
 }
 
-// =========================
-// HEART MATERIAL (GLOSSY + BRIGHT)
-// =========================
+// ================= HEART =================
 const geometry = new THREE.ExtrudeGeometry(createHeartShape(), {
   depth: 1.8,
   bevelEnabled: true,
@@ -133,7 +115,6 @@ const material = new THREE.MeshPhysicalMaterial({
   metalness: 0.85,
   roughness: 0.15,
   clearcoat: 1.0,
-  clearcoatRoughness: 0.1,
   emissive: 0x550000,
   emissiveIntensity: 2
 });
@@ -141,9 +122,7 @@ const material = new THREE.MeshPhysicalMaterial({
 const heart = new THREE.Mesh(geometry, material);
 scene.add(heart);
 
-// =========================
-// PARTICLES (MORE VISIBLE)
-// =========================
+// ================= PARTICLES =================
 const particles = new THREE.Group();
 
 for (let i = 0; i < 180; i++) {
@@ -164,10 +143,7 @@ for (let i = 0; i < 180; i++) {
 
 scene.add(particles);
 
-// =========================
-// ❤️ DRAG SYSTEM (RESTORED)
-// =========================
-
+// ================= DRAG SYSTEM (FIXED + FAST) =================
 let isDragging = false;
 let targetX = 0;
 let targetY = 0;
@@ -179,18 +155,16 @@ function getPointerPos(x, y) {
   };
 }
 
-// mouse
 window.addEventListener("mousedown", () => isDragging = true);
 window.addEventListener("mouseup", () => isDragging = false);
 
 window.addEventListener("mousemove", (e) => {
   if (!isDragging) return;
   const pos = getPointerPos(e.clientX, e.clientY);
-  targetX = pos.x * 3;
-  targetY = pos.y * 3;
+  targetX = pos.x * 4;
+  targetY = pos.y * 4;
 });
 
-// touch
 window.addEventListener("touchstart", () => isDragging = true);
 window.addEventListener("touchend", () => isDragging = false);
 
@@ -198,14 +172,11 @@ window.addEventListener("touchmove", (e) => {
   if (!isDragging) return;
   const t = e.touches[0];
   const pos = getPointerPos(t.clientX, t.clientY);
-  targetX = pos.x * 3;
-  targetY = pos.y * 3;
+  targetX = pos.x * 4;
+  targetY = pos.y * 4;
 });
 
-// =========================
-// ANIMATION (SMOOTHER + MORE LIFE)
-// =========================
-
+// ================= ANIMATION =================
 let t = 0;
 
 function animate() {
@@ -214,19 +185,19 @@ function animate() {
 
   t += 0.02;
 
-  // smooth drag follow
-  heart.position.x += (targetX - heart.position.x) * 0.12;
-  heart.position.y += (targetY - heart.position.y) * 0.12;
+  // FAST SMOOTH DRAG (NO FLIP)
+  heart.position.x += (targetX - heart.position.x) * 0.25;
+  heart.position.y += (targetY - heart.position.y) * 0.25;
 
-  // rotation
+  // NORMAL ROTATION ONLY
   heart.rotation.y += 0.006;
   heart.rotation.x += 0.003;
 
-  // stronger heartbeat (alive feel)
-  const pulse = 1 + Math.sin(t * 2.8) * 0.12;
+  // HEARTBEAT
+  const pulse = 1 + Math.sin(t * 2.8) * 0.10;
   heart.scale.set(pulse, pulse, pulse);
 
-  // particles motion
+  // PARTICLES
   particles.rotation.y += 0.002;
   particles.rotation.x += 0.001;
 
@@ -235,9 +206,7 @@ function animate() {
 
 animate();
 
-// =========================
-// RESIZE
-// =========================
+// ================= RESIZE =================
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
